@@ -1,6 +1,46 @@
-# Supervised Classification for Release Risk Prediction
+# ML Algorithms for Release Risk Prediction
 
-This project demonstrates supervised machine learning classification for predicting whether a software release is **low risk** or **high risk**. It uses measurable engineering signals to help quality, platform, and release teams prioritize their work and make more consistent release decisions.
+This project demonstrates supervised machine learning for release-quality decisions. It supports two related goals:
+
+- **Classification:** predict whether a release is **low risk** or **high risk**.
+- **Regression:** predict the expected numeric **defect count** for a release.
+
+The examples use measurable engineering signals to help quality, platform, and release teams prioritize validation work and make more consistent release decisions.
+
+## Project Objective
+
+The objective is to turn historical delivery and quality data into an early risk signal. The models support—not replace—engineering judgment by identifying releases that may need additional testing, approval, or monitoring before deployment.
+
+## Index
+
+1. [Problem Statement](#problem-statement)
+2. [Scope and Limitations](#scope-and-limitations)
+3. [Classification: Release-Risk Category](#classification-release-risk-category)
+4. [Regression: Expected Defect Count](#supervised-regression-for-release-risk-prediction)
+5. [Quality Engineering Use Cases](#quality-engineering-and-platform-modernization-use-case)
+6. [Production Adoption](#production-adoption-considerations)
+7. [Future Directions](#future-directions)
+8. [Setup and Run](#setup)
+
+## Scope and Limitations
+
+### In Scope
+
+- Supervised classification of releases into low-risk and high-risk categories
+- Supervised regression to estimate a release's defect count
+- Comparison of baseline, regularized, tree-based, and boosting models
+- Evaluation, threshold tuning, cross-validation, explainability, and governance guidance
+- Sample datasets that demonstrate the end-to-end workflow
+
+### Out of Scope
+
+- Automated release approvals or blocking deployments without human review
+- Direct production integrations with GitHub, Jira, CI/CD tools, or New Relic
+- A production-grade feature store, model registry, API service, or monitoring platform
+
+### Current Limitations
+
+The included datasets are intentionally small and embedded in the scripts for learning. Results are illustrative only. A real implementation needs larger, representative historical data, consistent feature definitions, security controls, and ongoing validation.
 
 ## Problem Statement
 
@@ -8,7 +48,9 @@ Engineering teams need to decide whether a release is safe to deploy. Those deci
 
 Without a consistent approach, high-risk releases may receive insufficient validation while low-risk releases may be delayed unnecessarily. This project applies supervised classification to combine historical delivery and quality signals into a clear release-risk class: `low_risk` or `high_risk`.
 
-## How the Problem Is Solved
+## Classification: Release-Risk Category
+
+### How the Problem Is Solved
 
 The model learns from historical releases with known outcomes. Each release is represented by engineering metrics, while its historical risk classification becomes the target label.
 
@@ -23,7 +65,7 @@ The model learns from historical releases with known outcomes. Each release is r
 
 The model is a decision-support tool. Release owners remain responsible for the final deployment decision.
 
-## Measures Taken to Solve the Problem
+### Measures Taken to Solve the Problem
 
 | Measure | Purpose |
 | --- | --- |
@@ -39,7 +81,7 @@ The model is a decision-support tool. Release owners remain responsible for the 
 | Production monitoring | Track drift, prediction quality, latency, and scoring failures |
 | Governance | Document model purpose, limitations, approvals, ownership, and audit requirements |
 
-## Improving Classification Performance
+### Improving Classification Performance
 
 ```mermaid
 flowchart TD
@@ -55,7 +97,7 @@ flowchart TD
     J --> K[Monitor drift in production]
 ```
 
-## When to Use Each Classification Algorithm
+### When to Use Each Classification Algorithm
 
 ```mermaid
 flowchart TD
@@ -84,7 +126,7 @@ flowchart TD
 | SVM | The dataset is small with many input dimensions |
 | KNN | A simple similarity-based approach is suitable and inference scale is modest |
 
-## Evaluation Metrics
+### Classification Model Evaluation
 
 | Metric | Meaning |
 | --- | --- |
@@ -96,6 +138,15 @@ flowchart TD
 | Confusion Matrix | Counts true positives, false positives, true negatives, and false negatives |
 
 For release-risk prediction, recall is often important because missing a genuinely high-risk release can lead to a production incident. Precision is also important so teams do not spend excessive effort investigating false alarms. The right balance depends on the organization’s risk tolerance.
+
+### Classification Examples
+
+| Release Scenario | Example Signals | Suggested Classification Outcome | Team Action |
+| --- | --- | --- | --- |
+| Low-risk release | Low code churn, no failed tests, high coverage, no recent incidents | Low risk | Follow the standard release process |
+| High-risk release | High code churn, several failed tests, low coverage, recent incidents | High risk | Add regression testing and require engineering approval |
+| False-positive review | Model predicts high risk, but release evidence is strong | Review threshold and feature contribution | Release with documented approval if evidence supports it |
+| Missed high-risk release | Model predicts low risk, but defects occur after deployment | Review false negative and retrain with verified outcome | Improve features, threshold, and monitoring |
 
 ## Quality Engineering and Platform Modernization Use Case
 
@@ -194,11 +245,32 @@ Use the same validation data for each model so their MAE, RMSE, R2, and MAPE res
 5. Compare cross-validation results and test-set metrics, not training accuracy alone.
 6. Select the simplest model that meets the error, latency, explainability, and governance requirements.
 
+### Regression Examples
+
+| Release Scenario | Example Signals | Possible Regression Outcome | Team Action |
+| --- | --- | --- | --- |
+| Stable release | Low churn, strong coverage, no failed tests | Low predicted defect count | Use normal testing and deployment controls |
+| Complex release | High churn, failed tests, low coverage, previous incidents | High predicted defect count | Add targeted testing and release approval checks |
+| Large prediction error | Actual defects differ substantially from prediction | High MAE or RMSE for that release | Review data quality, update features, and retrain |
+
 ### Enterprise Use Case
 
 In quality engineering and AI platform work, this model-comparison approach can estimate release risk or defect count from delivery and production signals. A higher predicted defect count can trigger extra regression testing, a quality gate, engineering approval, or enhanced New Relic monitoring after deployment.
 
 XGBoost may provide stronger accuracy for complex data, but production adoption also requires explainability, quality gates, monitoring, drift detection, governance, ownership, and human oversight.
+
+## Future Directions
+
+The next steps for evolving this project into a practical platform capability are:
+
+1. Replace embedded data with governed historical data from GitHub, CI/CD systems, test platforms, Jira, incident tools, and New Relic.
+2. Add deployment frequency, pull-request size, code complexity, service ownership, and post-release alert features.
+3. Use time-aware cross-validation so models are evaluated on future releases rather than random historical splits.
+4. Add automated hyperparameter searches and experiment tracking for repeatable model comparisons.
+5. Provide explainability reports, such as feature importance and release-level reason codes.
+6. Deploy a scoring API or CI/CD integration that surfaces risk before release approval.
+7. Monitor prediction quality, feature drift, model drift, latency, and scoring failures in production.
+8. Establish retraining cadence, model ownership, approval workflows, and audit evidence.
 
 ## Conclusion
 
@@ -213,7 +285,8 @@ For production adoption, add explainability, threshold tuning where applicable, 
 ├── README.md
 ├── requirements.txt
 ├── supervised_classification_algorithm.py
-└── supervised_regression_ml.py
+├── supervised_regression_ml.py
+└── .gitignore
 ```
 
 ## Setup
@@ -228,4 +301,10 @@ pip install -r requirements.txt
 
 ```bash
 python supervised_classification_algorithm.py
+```
+
+Run the regression comparison:
+
+```bash
+python supervised_regression_ml.py
 ```
