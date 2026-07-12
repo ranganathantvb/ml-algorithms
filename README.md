@@ -329,7 +329,7 @@ The example uses `0` for low risk, `1` for high risk, and `-1` for unlabeled rec
 | --- | --- | --- |
 | Logistic Regression baseline | Measure performance using only trusted labeled records | `class_weight`, `max_iter` |
 | Self-Training Random Forest | Generate high-confidence pseudo-labels for unlabeled records | `threshold`, `max_iter`, `n_estimators`, `max_depth`, `min_samples_leaf` |
-| Label Spreading | Share labels between similar release records | `kernel`, `gamma`, `alpha`, `max_iter` |
+| Label Spreading | Share labels between similar release records | `kernel`, `n_neighbors`, `alpha`, `max_iter` |
 
 The pseudo-label confidence threshold is tested at `0.60`, `0.70`, `0.80`, and `0.90`. A higher threshold produces fewer but more reliable pseudo-labels; a lower threshold uses more unlabeled data but increases the risk of propagating incorrect labels.
 

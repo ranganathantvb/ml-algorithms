@@ -276,8 +276,8 @@ def run_label_spreading(train_df: pd.DataFrame, test_df: pd.DataFrame) -> None:
             (
                 "model",
                 LabelSpreading(
-                    kernel="rbf",
-                    gamma=0.35,
+                    kernel="knn",
+                    n_neighbors=4,
                     alpha=0.2,
                     max_iter=50,
                 ),

@@ -23,9 +23,13 @@ Run:
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
 
 import numpy as np
 import pandas as pd
+
+os.environ.setdefault("LOKY_MAX_CPU_COUNT", "1")
+
 from sklearn.cluster import DBSCAN, KMeans
 from sklearn.decomposition import PCA
 from sklearn.ensemble import IsolationForest
@@ -209,6 +213,7 @@ def run_isolation_forest(result: pd.DataFrame, x_scaled: np.ndarray) -> pd.DataF
     model = IsolationForest(
         n_estimators=150,
         contamination=0.14,  # expected anomaly proportion, tune in real data
+        n_jobs=1,
         random_state=42,
     )
 
